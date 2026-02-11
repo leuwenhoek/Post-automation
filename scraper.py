@@ -39,8 +39,7 @@ def relevant_sites(search_about):
             results_list.append(result['href'])
     return results_list
 
-def main():
-    search_for = str(input('Want to search about : '))
+def scrape_sites(search_for):
     sites = relevant_sites(search_about=search_for)
     for site in sites:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0'}
@@ -54,5 +53,12 @@ def main():
             print(e)
             print(f'Unable to get DATA from {site} due to {e}')
 
+def main():
+    search_for = str(input('Want to search about : '))
+    scrape_sites(search_for)
+
 if __name__ == "__main__":
+    loc = Location()
+    if os.path.exists(loc.output_locate()):
+        os.remove(loc.output_locate())
     main()
