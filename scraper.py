@@ -88,7 +88,7 @@ def summary():
 
     ARTICLE = read_output()
     LANGUAGE = "english"
-    SENTENCES_COUNT = 3
+    SENTENCES_COUNT = 5
 
     parser = PlaintextParser(ARTICLE, Tokenizer(LANGUAGE))
     stemmer = Stemmer(LANGUAGE)
@@ -97,9 +97,9 @@ def summary():
 
     summary = summarizer(parser.document, SENTENCES_COUNT)
 
-    print("Summary:")
-    for sentence in summary:
-        print(str(sentence))
+    summary_ = ' '.join(str(sentence) for sentence in summary)
+    save_data(loc.summary_locate(),summary_)
+    return summary_
 
 def main():
     search_for = str(input('Want to search about : '))
