@@ -7,6 +7,7 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 from sumy.nlp.stemmers import Stemmer
 from sumy.utils import get_stop_words
+from trends import Trend
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.luhn import LuhnSummarizer
 from sumy.parsers.plaintext import PlaintextParser
@@ -138,8 +139,13 @@ def load_model(model_name,content):
     result = response.message.content
     return result
 
+def trending(keyword):
+    trend = Trend()
+    trend.analyze_trends(keyword)
 
 def main():
+    today_topic = str(input('Enter any key word : '))
+    trending(today_topic)
     search_for = str(input('Want to search about : '))
     scrape_sites(search_for)
     response = load_model(model,f"Topic: {search_for}\n\n-Summary:\n{summary()}\n\nInstructions:\n{prompt.format_summary()}\n\nReturn ONLY the new summary:")
