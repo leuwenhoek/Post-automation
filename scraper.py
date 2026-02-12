@@ -22,22 +22,26 @@ class Location:
         SUMMARY_FILE = os.path.join(Path(__file__).parent,'summary.txt')
         return SUMMARY_FILE
 
+loc = Location()
+
 def init():
     loc = Location()
+
     if os.path.exists(loc.output_locate()):
         os.remove(loc.output_locate())
+    
     if os.path.exists(loc.output_locate()):
         os.remove(loc.output_locate())
 
+    return 0
+
 def read_output():
-    loc = Location()
     with open(loc.output_locate(),'r',encoding='utf-8') as f:
         content = f.read()
     return content
 
-def save_output(data):
-    loc = Location()
-    with open(loc.output_locate(),'a',encoding='utf-8') as f:
+def save_data(location,data):
+    with open(location,'a',encoding='utf-8') as f:
         f.write(data)
 
 def beautify_html(html_content):
@@ -51,7 +55,7 @@ def beautify_html(html_content):
     return content.strip()
 
 def relevant_sites(search_about):
-    
+
     results_list = []
 
     with DDGS() as ddgs:
@@ -70,7 +74,7 @@ def scrape_sites(search_for):
     
         try:
             content = page.content
-            save_output(beautify_html(content))
+            save_data(loc.output_locate,beautify_html(content))
         except Exception as e:
             print(e)
             print(f'Unable to get DATA from {site} due to {e}')
