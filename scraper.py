@@ -128,12 +128,22 @@ def load_model(model_name,content):
     result = response.message.content
     return result
 
+class Create_Post:
+    def __init__(self):
+        pass
+
+    def X(self):
+        return "Creating X post"
+    
+    def LinkedIn(self):
+        return "Creating LinkedIn post"
+
 def main():
     search_for = str(input('Want to search about : '))
     scrape_sites(search_for)
     response = load_model(model,f"Topic: {search_for}\n\n-Summary:\n{summary()}\n\nInstructions:\n{prompt.format_summary()}\n\nReturn ONLY the new summary:")
     print(response)
-    
+
 if __name__ == "__main__":
     init()
     main()
