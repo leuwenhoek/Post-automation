@@ -17,6 +17,17 @@ class Location:
     def output_locate(self):
         OUTPUT_FILE = os.path.join(Path(__file__).parent,'output.txt') 
         return OUTPUT_FILE
+    
+    def summary_locate(self):
+        SUMMARY_FILE = os.path.join(Path(__file__).parent,'summary.txt')
+        return SUMMARY_FILE
+
+def init():
+    loc = Location()
+    if os.path.exists(loc.output_locate()):
+        os.remove(loc.output_locate())
+    if os.path.exists(loc.output_locate()):
+        os.remove(loc.output_locate())
 
 def read_output():
     loc = Location()
@@ -92,7 +103,5 @@ def main():
     summary()
 
 if __name__ == "__main__":
-    loc = Location()
-    if os.path.exists(loc.output_locate()):
-        os.remove(loc.output_locate())
+    init()
     main()
