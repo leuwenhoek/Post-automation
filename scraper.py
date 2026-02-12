@@ -74,7 +74,7 @@ def scrape_sites(search_for):
     
         try:
             content = page.content
-            save_data(loc.output_locate,beautify_html(content))
+            save_data(loc.output_locate(),beautify_html(content))
         except Exception as e:
             print(e)
             print(f'Unable to get DATA from {site} due to {e}')
