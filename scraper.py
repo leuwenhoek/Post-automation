@@ -37,6 +37,16 @@ class Location:
         SUMMARY_FILE = os.path.join(Path(__file__).parent,'summary.txt')
         return SUMMARY_FILE
 
+class Create_Post:
+    def __init__(self):
+        pass
+
+    def X(self):
+        return "Creating X post"
+    
+    def LinkedIn(self):
+        return "Creating LinkedIn post"
+
 loc = Location()
 prompt = Prompt()
 model = 'phi'
@@ -128,15 +138,6 @@ def load_model(model_name,content):
     result = response.message.content
     return result
 
-class Create_Post:
-    def __init__(self):
-        pass
-
-    def X(self):
-        return "Creating X post"
-    
-    def LinkedIn(self):
-        return "Creating LinkedIn post"
 
 def main():
     search_for = str(input('Want to search about : '))
