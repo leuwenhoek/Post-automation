@@ -3,7 +3,12 @@ import os
 from pathlib import Path
 from bs4 import BeautifulSoup
 from ddgs import DDGS
-from transformers import pipeline
+from sumy.parsers.plaintext import PlaintextParser
+from sumy.nlp.tokenizers import Tokenizer
+from sumy.summarizers.luhn import LuhnSummarizer
+from sumy.nlp.stemmers import Stemmer
+from sumy.utils import get_stop_words
+import nltk
 
 class Location:
     def __init__(self):
@@ -13,7 +18,13 @@ class Location:
         OUTPUT_FILE = os.path.join(Path(__file__).parent,'output.txt') 
         return OUTPUT_FILE
 
-def save_output(location,data):
+def read_output():
+    loc = Location()
+    with open(loc.output_locate(),'r',encoding='utf-8') as f:
+        content = f.read()
+    return content
+
+def save_output(data):
     loc = Location()
     with open(loc.output_locate(),'a',encoding='utf-8') as f:
         f.write(data)
@@ -48,14 +59,37 @@ def scrape_sites(search_for):
     
         try:
             content = page.content
-            save_output(Path(__file__).parent,beautify_html(content))
+            save_output(beautify_html(content))
         except Exception as e:
             print(e)
             print(f'Unable to get DATA from {site} due to {e}')
 
+def summary():
+
+    try:
+        nltk.data.find('tokenizers/punkt')
+    except LookupError:
+        nltk.download('punkt', quiet=True)
+
+    ARTICLE = read_output()
+    LANGUAGE = "english"
+    SENTENCES_COUNT = 3
+
+    parser = PlaintextParser(ARTICLE, Tokenizer(LANGUAGE))
+    stemmer = Stemmer(LANGUAGE)
+    summarizer = LuhnSummarizer(stemmer)
+    summarizer.stop_words = get_stop_words(LANGUAGE)
+
+    summary = summarizer(parser.document, SENTENCES_COUNT)
+
+    print("Summary:")
+    for sentence in summary:
+        print(str(sentence))
+
 def main():
     search_for = str(input('Want to search about : '))
     scrape_sites(search_for)
+    summary()
 
 if __name__ == "__main__":
     loc = Location()
