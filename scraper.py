@@ -1,13 +1,15 @@
 import requests
 import os
 import nltk
+import time
 from ddgs import DDGS
 from ollama import chat
 from pathlib import Path
+from trends import Trend
 from bs4 import BeautifulSoup
+from plyer import notification
 from sumy.nlp.stemmers import Stemmer
 from sumy.utils import get_stop_words
-from trends import Trend
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.luhn import LuhnSummarizer
 from sumy.parsers.plaintext import PlaintextParser
@@ -200,21 +202,36 @@ def trending(keyword):
     response = load_model(model,prompt.top_topic(topics))
     return response
 
+
+def send_notification(title,msg):
+    notification.notify(            #type: ignore
+        title=title,
+        message=msg,
+        timeout=5,
+        app_name="Post Automation"
+    )
+
 def main():
     today_topic = str(input('Enter any key word : '))
+
     best_topic = trending(today_topic)
+    send_notification('Best topic found','Model response has been generated..')
     print(f"Best Topic reccomendation by phi : {best_topic}")
+    
     search_for = str(input('Want to search about : '))
     scrape_sites(search_for)
+    send_notification('Web Scraping completed','Web scraping has been done..')
+
     summary_response = load_model(model,f"Topic: {search_for}\n\n-Summary:\n{summary()}\n\nInstructions:\n{prompt.format_summary()}\n\nReturn ONLY the new summary:")
     save_data(loc.summary_locate(),summary_response)
-    print(summary_response)
+    send_notification('Summary generation Done.','Summary generation has been done..')
+
     print(f'Summary saved into {loc.summary_locate()}')
+    send_notification('Creating Post.','Creating post for X..')
     print('Creating X post..')
     X_post = post.X(summary_response)
+    send_notification('X post created.','X post has been generated..')
     save_data(loc.post('x'),X_post)
-    
-
     
 
 if __name__ == "__main__":
