@@ -1,14 +1,29 @@
 import requests
 import os
+import nltk
+from ddgs import DDGS
+from ollama import chat
 from pathlib import Path
 from bs4 import BeautifulSoup
-from ddgs import DDGS
-from sumy.parsers.plaintext import PlaintextParser
-from sumy.nlp.tokenizers import Tokenizer
-from sumy.summarizers.luhn import LuhnSummarizer
 from sumy.nlp.stemmers import Stemmer
 from sumy.utils import get_stop_words
-import nltk
+from sumy.nlp.tokenizers import Tokenizer
+from sumy.summarizers.luhn import LuhnSummarizer
+from sumy.parsers.plaintext import PlaintextParser
+
+class Prompt():
+    def __init__(self):
+        pass
+
+    def format_summary(self):
+        cmd = """Take the provided context and content. Create a clean, concise summary. 
+                    - Remove fluff and repetition
+                    - Focus only on key points  
+                    - Use direct, professional language
+                    - Maximum 5-6 sentences
+                    - Add somthing if you think that the additional stuff is needed
+            """
+        return cmd
 
 class Location:
     def __init__(self):
@@ -23,6 +38,8 @@ class Location:
         return SUMMARY_FILE
 
 loc = Location()
+prompt = Prompt()
+model = 'phi'
 
 def init():
     loc = Location()
@@ -101,11 +118,22 @@ def summary():
     save_data(loc.summary_locate(),summary_)
     return summary_
 
+def load_model(model_name,content):
+
+    response = chat(
+        model=model_name,
+        messages=[{'role': 'system', 'content': f"{content}"}]
+    )
+
+    result = response.message.content
+    return result
+
 def main():
     search_for = str(input('Want to search about : '))
     scrape_sites(search_for)
-    summary()
-
+    response = load_model(model,f"Topic: {search_for}\n\n-Summary:\n{summary()}\n\nInstructions:\n{prompt.format_summary()}\n\nReturn ONLY the new summary:")
+    print(response)
+    
 if __name__ == "__main__":
     init()
     main()
