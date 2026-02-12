@@ -26,6 +26,41 @@ class Prompt():
             """
         return cmd
 
+    def top_topic(self,topics):
+
+        topics_str = ", ".join(str(topic) for topic in topics)
+
+        cmd = f'''TOPICS: {topics_str}
+
+PICK ONE TOPIC ONLY.
+OUTPUT FORMAT: 
+"<topic_name>"
+
+RULE 1: ONLY the topic name between quotes
+RULE 2: NO explanations  
+RULE 3: NO other text
+
+"Quantum Computing Breakthroughs"'''
+
+        return cmd
+
+    def X_post(self,summary):
+        cmd = f'''Create an X (Twitter) post based on this SUMMARY: {summary}
+
+Guidelines:
+- Max 200 characters (strict limit)
+- Minimal emojis (0-1 max, only if they add value)
+- Proper line spacing for readability
+- Clean, focused for X audience: concise, punchy, insightful
+- Highlight 1 key takeaway or unique angle
+- Public persona: wise, value-driven, sparks curiosity
+- End with subtle CTA or question
+
+Output only the final post + character count. No extras.
+'''
+        return cmd
+
+
 class Location:
     def __init__(self):
         pass
@@ -38,18 +73,30 @@ class Location:
         SUMMARY_FILE = os.path.join(Path(__file__).parent,'summary.txt')
         return SUMMARY_FILE
 
+    def post(self,of):
+        X_FILE = os.path.join(Path(__file__).parent,'post','X.txt')
+        LINKEDIN_FILE = os.path.join(Path(__file__).parent,'post','LinkedIn.txt')
+        if of.lower() == 'x':
+            return X_FILE
+        elif of.lower() == 'linkedin':
+            return LINKEDIN_FILE
+        
+        raise Exception('Posting platform not found') 
+    
 class Create_Post:
     def __init__(self):
         pass
 
-    def X(self):
-        return "Creating X post"
+    def X(self,summary):
+        response = load_model(model,prompt.X_post(summary))
+        return response
     
     def LinkedIn(self):
         return "Creating LinkedIn post"
 
 loc = Location()
 prompt = Prompt()
+post = Create_Post()
 model = 'phi'
 
 def init():
@@ -58,9 +105,15 @@ def init():
     if os.path.exists(loc.output_locate()):
         os.remove(loc.output_locate())
     
-    if os.path.exists(loc.output_locate()):
-        os.remove(loc.output_locate())
+    if os.path.exists(loc.summary_locate()):
+        os.remove(loc.summary_locate())
 
+    if os.path.exists(loc.post('x')):
+        os.remove(loc.post('x'))
+
+    if not os.path.exists(os.path.join(os.getcwd(),'post')):
+        os.mkdir('post')
+    
     return 0
 
 def read_output():
@@ -129,11 +182,11 @@ def summary():
     save_data(loc.summary_locate(),summary_)
     return summary_
 
-def load_model(model_name,content):
+def load_model(model_name,prompt):
 
     response = chat(
         model=model_name,
-        messages=[{'role': 'system', 'content': f"{content}"}]
+        messages=[{'role': 'system', 'content': f"{prompt}"}]
     )
 
     result = response.message.content
@@ -142,14 +195,27 @@ def load_model(model_name,content):
 def trending(keyword):
     trend = Trend()
     trend.analyze_trends(keyword)
+    topics = trend.get_related_topics(keyword)
+
+    response = load_model(model,prompt.top_topic(topics))
+    return response
 
 def main():
     today_topic = str(input('Enter any key word : '))
-    trending(today_topic)
+    best_topic = trending(today_topic)
+    print(f"Best Topic reccomendation by phi : {best_topic}")
     search_for = str(input('Want to search about : '))
     scrape_sites(search_for)
-    response = load_model(model,f"Topic: {search_for}\n\n-Summary:\n{summary()}\n\nInstructions:\n{prompt.format_summary()}\n\nReturn ONLY the new summary:")
-    print(response)
+    summary_response = load_model(model,f"Topic: {search_for}\n\n-Summary:\n{summary()}\n\nInstructions:\n{prompt.format_summary()}\n\nReturn ONLY the new summary:")
+    save_data(loc.summary_locate(),summary_response)
+    print(summary_response)
+    print(f'Summary saved into {loc.summary_locate()}')
+    print('Creating X post..')
+    X_post = post.X(summary_response)
+    save_data(loc.post('x'),X_post)
+    
+
+    
 
 if __name__ == "__main__":
     init()
