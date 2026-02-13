@@ -68,4 +68,3 @@ class Trend:
 if __name__ == "__main__":
     keyword = input("🎯 Enter keyword/sentence: ")
     trend = Trend()
-    trend.analyze_trends(keyword)
