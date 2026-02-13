@@ -2,6 +2,7 @@ import requests
 import os
 import nltk
 import time
+import subprocess
 from ddgs import DDGS
 from ollama import chat
 from pathlib import Path
@@ -115,12 +116,50 @@ class Create_Post:
 loc = Location()
 prompt = Prompt()
 post = Create_Post()
-model = 'phi'
 
-def init():
-    for path in [loc.output_locate(), loc.summary_locate(), loc.post('x')]:
-        if os.path.exists(path): os.remove(path)
+def init(cmd=None):
+    if not cmd:
+        for path in [loc.output_locate(), loc.summary_locate(), loc.post('x')]:
+            if os.path.exists(path): os.remove(path)
+    def model():
+        try:
+            models_available = subprocess.run(['ollama','list'], capture_output=True, text=True, check=True)
+            models_text = models_available.stdout.strip()
+            
+            header_content = f"""[bold cyan]AI MODELS AVAILABLE[/bold cyan]
+    [italic dim]Choose from available models below[/italic dim]
+
+    [green]Available Models:[/green]
+    {models_text}"""
+            
+            header_panel = Panel(
+                Align.center(header_content),
+                border_style="cyan",
+                padding=1
+            )
+            
+            rprint(header_panel)
+            
+        except subprocess.CalledProcessError:
+            rprint(Panel("[red]No models found![/red]\nRun: [green]ollama pull phi (or any other model)[/green]", border_style="red"))
+            return None
+        except FileNotFoundError:
+            raise FileNotFoundError('No ollama found [check that ollama is setuped in you PC.]')
+        
+        print()
+        model_choosed = console.input('[bold cyan]Enter model name[/bold cyan] : ').strip()
+        if model_choosed:
+            return model_choosed
+        else:
+            raise ValueError('[bold red]No model Given[/bold red]')
+
+    if cmd:
+        if cmd.lower() == "model":
+            return model()
+            
     return 0
+
+model = init('model')
 
 def read_output():
     with open(loc.output_locate(),'r',encoding='utf-8') as f:
